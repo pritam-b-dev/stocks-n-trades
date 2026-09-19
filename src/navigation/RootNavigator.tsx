@@ -25,7 +25,7 @@ export default function RootNavigator() {
       <Stack.Screen
         name="MarketPulse"
         component={MarketPulseScreen}
-        options={{ title: "Stocks-N-Trades" }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Screener"
