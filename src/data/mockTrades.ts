@@ -3,7 +3,7 @@ import { InsiderTrade } from "../types/InsiderTrade";
 export const mockTrades: InsiderTrade[] = [
   {
     id: "trade-1",
-    ticker: "VNTX",
+    ticker: "DEMO-A",
     companyName: "Vortex Dynamics Inc.",
     sector: "Technology",
     insiderName: "Kaelen Vance",
@@ -21,7 +21,7 @@ export const mockTrades: InsiderTrade[] = [
   },
   {
     id: "trade-2",
-    ticker: "NXUS",
+    ticker: "DEMO-B",
     companyName: "Nexus Global Logistics",
     sector: "Industrial",
     insiderName: "Evelyn Sterling",
@@ -39,7 +39,7 @@ export const mockTrades: InsiderTrade[] = [
   },
   {
     id: "trade-3",
-    ticker: "LMPR",
+    ticker: "DEMO-C",
     companyName: "Lumina Pharmaceuticals",
     sector: "Healthcare",
     insiderName: "Marcus Thorne",
@@ -57,7 +57,7 @@ export const mockTrades: InsiderTrade[] = [
   },
   {
     id: "trade-4",
-    ticker: "QNTM",
+    ticker: "DEMO-D",
     companyName: "Quantum Energy Corp",
     sector: "Energy",
     insiderName: "Aiden Brooks",
@@ -75,7 +75,7 @@ export const mockTrades: InsiderTrade[] = [
   },
   {
     id: "trade-5",
-    ticker: "CYBR",
+    ticker: "DEMO-E",
     companyName: "CyberShield Systems",
     sector: "Technology",
     insiderName: "Sienna Cross",
@@ -93,7 +93,7 @@ export const mockTrades: InsiderTrade[] = [
   },
   {
     id: "trade-6",
-    ticker: "BOSC",
+    ticker: "DEMO-F",
     companyName: "Borealis Consumer Goods",
     sector: "Consumer",
     insiderName: "Julian Mercer",
@@ -111,7 +111,7 @@ export const mockTrades: InsiderTrade[] = [
   },
   {
     id: "trade-7",
-    ticker: "APEX",
+    ticker: "DEMO-G",
     companyName: "Apex Financial Holdings",
     sector: "Financials",
     insiderName: "Damon Vance",
@@ -129,7 +129,7 @@ export const mockTrades: InsiderTrade[] = [
   },
   {
     id: "trade-8",
-    ticker: "STRT",
+    ticker: "DEMO-H",
     companyName: "Stratosphere Robotics",
     sector: "Industrial",
     insiderName: "Nora Sinclair",
