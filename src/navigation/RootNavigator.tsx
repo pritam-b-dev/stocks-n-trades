@@ -30,7 +30,7 @@ export default function RootNavigator() {
       <Stack.Screen
         name="Screener"
         component={ScreenerScreen}
-        options={{ title: "Screener" }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="TradeDetails"
