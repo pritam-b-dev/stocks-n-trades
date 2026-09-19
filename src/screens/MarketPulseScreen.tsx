@@ -1,150 +1,136 @@
-import React, { useMemo } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   StyleSheet,
+  SafeAreaView,
 } from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { mockTrades } from "../data/mockTrades";
-import { theme } from "../theme/theme";
 import { InsiderTrade } from "../types/InsiderTrade";
-import { SummaryCard } from "../components/SummaryCard";
-import { TradeCard } from "../components/TradeCard";
+import { theme } from "../theme/theme";
+import { SignalBadge } from "../components/SignalBadge";
 
-type Props = NativeStackScreenProps<RootStackParamList, "MarketPulse">;
+type MarketPulseNavProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "MarketPulse"
+>;
 
-const formatCurrency = (val: number): string => {
-  if (val >= 1_000_000) {
-    return `$${(val / 1_000_000).toFixed(2)}M`;
-  }
-  if (val >= 1_000) {
-    return `$${(val / 1_000).toFixed(0)}K`;
-  }
-  return `$${val.toLocaleString()}`;
-};
+interface Props {
+  navigation: MarketPulseNavProp;
+}
 
 export default function MarketPulseScreen({ navigation }: Props) {
-  const summaryMetrics = useMemo(() => {
-    const count = mockTrades.length;
-    let purchaseSum = 0;
-    let saleSum = 0;
+  const [filterType, setFilterType] = useState<"All" | "Purchase" | "Sale">(
+    "All",
+  );
 
-    mockTrades.forEach((trade) => {
-      if (trade.transactionType === "Purchase") {
-        purchaseSum += trade.totalValue;
-      } else if (trade.transactionType === "Sale") {
-        saleSum += trade.totalValue;
-      }
-    });
+  const filteredTrades = mockTrades.filter((t) => {
+    if (filterType === "All") return true;
+    return t.transactionType === filterType;
+  });
 
-    return { count, purchaseSum, saleSum };
-  }, []);
+  const renderTradeCard = ({ item }: { item: InsiderTrade }) => {
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        activeOpacity={0.7}
+        onPress={() =>
+          navigation.navigate("TradeDetails", { tradeId: item.id })
+        }
+        accessibilityRole="button"
+        accessibilityLabel={`View trade details for ${item.ticker}, ${item.insiderName}, ${item.transactionType} of ${item.shares.toLocaleString()} shares`}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.tickerGroup}>
+            <Text style={styles.ticker}>{item.ticker}</Text>
+            <Text style={styles.companyName} numberOfLines={1}>
+              {item.companyName}
+            </Text>
+          </View>
+          <SignalBadge strength={item.signalStrength} />
+        </View>
 
-  const topSignals = useMemo(() => {
-    return mockTrades
-      .filter((trade) => trade.signalStrength === "High")
-      .sort((a, b) => b.totalValue - a.totalValue);
-  }, []);
+        <View style={styles.divider} />
 
-  const latestTrades = useMemo(() => {
-    return [...mockTrades].sort(
-      (a, b) => new Date(b.filedAt).getTime() - new Date(a.filedAt).getTime(),
+        <View style={styles.detailsRow}>
+          <View style={styles.detailCol}>
+            <Text style={styles.label}>Insider</Text>
+            <Text style={styles.valueBold} numberOfLines={1}>
+              {item.insiderName}
+            </Text>
+            <Text style={styles.subValue}>{item.insiderRole}</Text>
+          </View>
+
+          <View style={styles.detailColRight}>
+            <Text style={styles.label}>Transaction</Text>
+            <Text
+              style={[
+                styles.valueBold,
+                item.transactionType === "Purchase"
+                  ? { color: theme.colors.purchase }
+                  : { color: theme.colors.sale },
+              ]}
+            >
+              {item.transactionType} ({item.transactionCode})
+            </Text>
+            <Text style={styles.subValue}>
+              {item.shares.toLocaleString()} @ ${item.pricePerShare.toFixed(2)}
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
     );
-  }, []);
-
-  const handleTradePress = (tradeId: string) => {
-    navigation.navigate("TradeDetails", { tradeId });
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* HEADER & DEMO BADGE */}
-      <View style={styles.headerRow}>
-        <View>
-          <Text style={styles.screenTitle}>Market Pulse</Text>
-          <Text style={styles.subtitle}>SEC Form 4 Insider Tracking</Text>
-        </View>
-        <View style={styles.demoBadge}>
-          <Text style={styles.demoBadgeText}>Demo Data</Text>
-        </View>
-      </View>
-
-      {/* SEARCH ENTRY POINT / SCREENER TRIGGER */}
-      <TouchableOpacity
-        style={styles.searchBar}
-        activeOpacity={0.8}
-        onPress={() => navigation.navigate("Screener")}
-      >
-        <Text style={styles.searchPlaceholder}>
-          🔍 Search ticker, company, or filter trades...
+    <SafeAreaView style={styles.container}>
+      {/* HEADER */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Market Pulse</Text>
+        <Text style={styles.subtitle}>
+          Real-time SEC Form 4 insider transaction feed
         </Text>
-      </TouchableOpacity>
-
-      {/* EXACTLY 3 SUMMARY CARDS */}
-      <View style={styles.summaryContainer}>
-        <SummaryCard
-          label="Transactions"
-          value={summaryMetrics.count}
-          subtext="Total Trades Recorded"
-        />
-        <SummaryCard
-          label="Purchase Value"
-          value={formatCurrency(summaryMetrics.purchaseSum)}
-          subtext="Buy Orders Total"
-          valueColor={theme.colors.purchase}
-          borderColor={theme.colors.purchase}
-        />
-        <SummaryCard
-          label="Sale Value"
-          value={formatCurrency(summaryMetrics.saleSum)}
-          subtext="Sell Orders Total"
-          valueColor={theme.colors.sale}
-          borderColor={theme.colors.sale}
-        />
       </View>
 
-      {/* TOP SIGNALS SECTION */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>🔥 Top Signals</Text>
-        <Text style={styles.sectionSubtitle}>High confidence transactions</Text>
-      </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.horizontalScroll}
-      >
-        {topSignals.map((trade: InsiderTrade) => (
-          <TradeCard
-            key={trade.id}
-            trade={trade}
-            variant="card"
-            onPress={() => handleTradePress(trade.id)}
-          />
-        ))}
-      </ScrollView>
-
-      {/* LATEST TRADES SECTION */}
-      <View style={styles.sectionHeader}>
-        <View style={styles.rowSpaceBetween}>
-          <Text style={styles.sectionTitle}>Latest Trades</Text>
-          <TouchableOpacity onPress={() => navigation.navigate("Screener")}>
-            <Text style={styles.viewAllText}>Open Screener ›</Text>
+      {/* FILTER TABS */}
+      <View style={styles.filterRow}>
+        {(["All", "Purchase", "Sale"] as const).map((type) => (
+          <TouchableOpacity
+            key={type}
+            style={[
+              styles.filterTab,
+              filterType === type && styles.filterTabActive,
+            ]}
+            onPress={() => setFilterType(type)}
+            accessibilityRole="button"
+            accessibilityLabel={`Filter by ${type} trades`}
+            accessibilityState={{ selected: filterType === type }}
+          >
+            <Text
+              style={[
+                styles.filterTabText,
+                filterType === type && styles.filterTabTextActive,
+              ]}
+            >
+              {type}
+            </Text>
           </TouchableOpacity>
-        </View>
+        ))}
       </View>
 
-      {latestTrades.map((trade: InsiderTrade) => (
-        <TradeCard
-          key={trade.id}
-          trade={trade}
-          variant="row"
-          onPress={() => handleTradePress(trade.id)}
-        />
-      ))}
-    </ScrollView>
+      {/* TRADE LIST */}
+      <FlatList
+        data={filteredTrades}
+        keyExtractor={(item) => item.id}
+        renderItem={renderTradeCard}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -153,19 +139,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  content: {
+  header: {
     padding: theme.spacing.md,
-    paddingBottom: theme.spacing.xl * 2,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
   },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: theme.spacing.md,
-  },
-  screenTitle: {
-    fontSize: theme.typography.xl,
-    fontWeight: "bold",
+  title: {
+    fontSize: theme.typography.lg,
+    fontWeight: "800",
     color: theme.colors.textPrimary,
   },
   subtitle: {
@@ -173,64 +155,96 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginTop: 2,
   },
-  demoBadge: {
-    backgroundColor: "#FEF3C7",
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#F59E0B",
-  },
-  demoBadgeText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#B45309",
-  },
-  searchBar: {
+  filterRow: {
+    flexDirection: "row",
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
     backgroundColor: theme.colors.surface,
+    gap: 4,
+  },
+  filterTab: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: "#F3F4F6",
+    minHeight: 44,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  filterTabActive: {
+    backgroundColor: theme.colors.accent,
+  },
+  filterTabText: {
+    fontSize: theme.typography.sm,
+    color: theme.colors.textSecondary,
+    fontWeight: "600",
+  },
+  filterTabTextActive: {
+    color: "#FFFFFF",
+  },
+  listContent: {
     padding: theme.spacing.md,
-    borderRadius: 10,
+    gap: theme.spacing.md,
+  },
+  card: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: 12,
+    padding: theme.spacing.md,
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    marginBottom: theme.spacing.lg,
+    minHeight: 44,
   },
-  searchPlaceholder: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.typography.md,
-  },
-  summaryContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: theme.spacing.lg,
-    gap: theme.spacing.xs,
-  },
-  sectionHeader: {
-    marginBottom: theme.spacing.sm,
-    marginTop: theme.spacing.sm,
-  },
-  rowSpaceBetween: {
+  cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
   },
-  sectionTitle: {
-    fontSize: theme.typography.lg,
-    fontWeight: "700",
+  tickerGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    flexShrink: 1,
+  },
+  ticker: {
+    fontSize: theme.typography.md,
+    fontWeight: "800",
     color: theme.colors.textPrimary,
   },
-  sectionSubtitle: {
+  companyName: {
     fontSize: theme.typography.sm,
     color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.xs,
+    flexShrink: 1,
   },
-  viewAllText: {
-    color: theme.colors.accent,
+  divider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginVertical: theme.spacing.sm,
+  },
+  detailsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  detailCol: {
+    flex: 1,
+  },
+  detailColRight: {
+    alignItems: "flex-end",
+  },
+  label: {
+    fontSize: 11,
+    color: theme.colors.textSecondary,
+    textTransform: "uppercase",
+  },
+  valueBold: {
     fontSize: theme.typography.sm,
-    fontWeight: "600",
+    fontWeight: "700",
+    color: theme.colors.textPrimary,
+    marginTop: 2,
   },
-  horizontalScroll: {
-    paddingRight: theme.spacing.md,
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.lg,
+  subValue: {
+    fontSize: 12,
+    color: theme.colors.textSecondary,
+    marginTop: 2,
   },
 });

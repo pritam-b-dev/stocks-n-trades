@@ -17,6 +17,7 @@ export const spacing = {
 };
 
 export const typography = {
+  xs: 10,
   sm: 12,
   md: 16,
   lg: 20,

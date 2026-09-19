@@ -14,7 +14,6 @@ import { SignalBadge } from "../components/SignalBadge";
 
 type Props = NativeStackScreenProps<RootStackParamList, "TradeDetails">;
 
-// Currency & Date Formatting Helpers
 const formatCurrency = (val: number): string => {
   return `$${val.toLocaleString(undefined, {
     minimumFractionDigits: 2,
@@ -55,7 +54,6 @@ const formatDateTime = (isoString: string): string => {
 export default function TradeDetailsScreen({ route, navigation }: Props) {
   const { tradeId } = route.params;
 
-  // 1. Look up trade record from mockTrades
   const trade = mockTrades.find((t) => t.id === tradeId);
 
   if (!trade) {
@@ -65,6 +63,8 @@ export default function TradeDetailsScreen({ route, navigation }: Props) {
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel="Go back to previous screen"
         >
           <Text style={styles.backBtnText}>‹ Go Back</Text>
         </TouchableOpacity>
@@ -72,7 +72,6 @@ export default function TradeDetailsScreen({ route, navigation }: Props) {
     );
   }
 
-  // 2. Prepare data for custom 7-day chart (priceHistory7d is number[])
   const priceHistory: number[] = trade.priceHistory7d || [];
   const minPrice = priceHistory.length ? Math.min(...priceHistory) : 0;
   const maxPrice = priceHistory.length ? Math.max(...priceHistory) : 1;
@@ -87,10 +86,16 @@ export default function TradeDetailsScreen({ route, navigation }: Props) {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Go back to trade list"
           >
             <Text style={styles.backButtonText}>‹ Back</Text>
           </TouchableOpacity>
-          <View style={styles.demoBadge}>
+          <View
+            style={styles.demoBadge}
+            accessibilityRole="text"
+            accessibilityLabel="Demo Data indicator"
+          >
             <Text style={styles.demoBadgeText}>Demo Data</Text>
           </View>
         </View>
@@ -271,7 +276,7 @@ export default function TradeDetailsScreen({ route, navigation }: Props) {
           </Text>
         </View>
 
-        {/* REQUIRED EXACT DISCLAIMER TEXT */}
+        {/* REQUIRED DISCLAIMER TEXT */}
         <View style={styles.disclaimerBox}>
           <Text style={styles.disclaimerText}>
             Disclaimer: This application uses simulated data for educational and
@@ -299,9 +304,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: theme.spacing.sm,
+    flexWrap: "wrap",
   },
   backButton: {
-    paddingVertical: theme.spacing.xs,
+    minHeight: 44,
+    minWidth: 44,
+    justifyContent: "center",
+    paddingVertical: 4,
     paddingRight: theme.spacing.md,
   },
   backButtonText: {
@@ -312,7 +321,7 @@ const styles = StyleSheet.create({
   demoBadge: {
     backgroundColor: "#FEF3C7",
     paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
+    paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
     borderColor: "#F59E0B",
@@ -328,6 +337,7 @@ const styles = StyleSheet.create({
   tickerRow: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     marginBottom: 2,
   },
   ticker: {
@@ -338,7 +348,7 @@ const styles = StyleSheet.create({
   },
   sectorBadge: {
     backgroundColor: "#E0E7FF",
-    paddingHorizontal: theme.spacing.xs + 2,
+    paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
   },
@@ -363,7 +373,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: theme.spacing.xs,
+    marginBottom: 4,
+    flexWrap: "wrap",
   },
   signalTitle: {
     fontSize: theme.typography.md,
@@ -387,7 +398,7 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.md,
     fontWeight: "700",
     color: theme.colors.textPrimary,
-    marginBottom: theme.spacing.xs,
+    marginBottom: 4,
   },
   cardSubtitle: {
     fontSize: 12,
@@ -399,6 +410,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 6,
+    flexWrap: "wrap",
   },
   detailLabel: {
     fontSize: theme.typography.sm,
@@ -467,7 +479,7 @@ const styles = StyleSheet.create({
   eduText: {
     fontSize: theme.typography.sm,
     color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.xs,
+    marginBottom: 4,
     lineHeight: 20,
   },
   eduBold: {
@@ -480,7 +492,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#E5E7EB",
-    marginTop: theme.spacing.xs,
+    marginTop: 4,
   },
   disclaimerText: {
     fontSize: 11,
@@ -503,8 +515,10 @@ const styles = StyleSheet.create({
   backBtn: {
     backgroundColor: theme.colors.accent,
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.xs + 2,
+    paddingVertical: theme.spacing.sm,
     borderRadius: 6,
+    minHeight: 44,
+    justifyContent: "center",
   },
   backBtnText: {
     color: "#FFFFFF",
