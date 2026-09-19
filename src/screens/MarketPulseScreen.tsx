@@ -88,7 +88,7 @@ export default function MarketPulseScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* HEADER */}
+      {/* IN-SCREEN HEADER */}
       <View style={styles.header}>
         <Text style={styles.title}>Market Pulse</Text>
         <Text style={styles.subtitle}>

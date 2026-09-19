@@ -1,8 +1,8 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import TradeDetailsScreen from "../screens/TradeDetailsScreen";
 import MarketPulseScreen from "../screens/MarketPulseScreen";
 import ScreenerScreen from "../screens/ScreenerScreen";
+import TradeDetailsScreen from "../screens/TradeDetailsScreen";
 
 export type RootStackParamList = {
   MarketPulse: undefined;
@@ -18,24 +18,24 @@ export default function RootNavigator() {
       initialRouteName="MarketPulse"
       screenOptions={{
         headerStyle: { backgroundColor: "#FFFFFF" },
-        headerTitleStyle: { fontWeight: "600" },
-        headerTintColor: "#111827",
+        headerTintColor: "#1A1D1F",
+        headerTitleStyle: { fontWeight: "700" },
       }}
     >
       <Stack.Screen
         name="MarketPulse"
         component={MarketPulseScreen}
-        options={{ title: "Market Pulse" }}
+        options={{ title: "Stocks-N-Trades" }}
       />
       <Stack.Screen
         name="Screener"
         component={ScreenerScreen}
-        options={{ title: "Trade Screener" }}
+        options={{ title: "Screener" }}
       />
       <Stack.Screen
         name="TradeDetails"
         component={TradeDetailsScreen}
-        options={{ title: "Trade Details" }}
+        options={{ title: "Trade Details", headerShown: false }}
       />
     </Stack.Navigator>
   );
