@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   ScrollView,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
@@ -31,14 +30,12 @@ type RoleFilter = "All roles" | "CEO" | "CFO" | "Director";
 type ThresholdFilter = "Any" | "$100K+" | "$500K+" | "$1M+";
 
 export default function ScreenerScreen({ navigation }: Props) {
-  // Filter States
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState<TypeFilter>("All");
   const [selectedRole, setSelectedRole] = useState<RoleFilter>("All roles");
   const [selectedThreshold, setSelectedThreshold] =
     useState<ThresholdFilter>("Any");
 
-  // Clear Filters Handler
   const handleClearFilters = () => {
     setSearchQuery("");
     setSelectedType("All");
@@ -46,16 +43,13 @@ export default function ScreenerScreen({ navigation }: Props) {
     setSelectedThreshold("Any");
   };
 
-  // Filtering Logic (AND combination)
   const filteredTrades = mockTrades.filter((trade) => {
-    // 1. Search Query (Ticker or Company Name, case-insensitive, partial match)
     const query = searchQuery.trim().toLowerCase();
     const matchesSearch =
       query === "" ||
       trade.ticker.toLowerCase().includes(query) ||
       trade.companyName.toLowerCase().includes(query);
 
-    // 2. Transaction Type Filter
     const typeLower = trade.transactionType.toLowerCase();
     let matchesType = true;
     if (selectedType === "Purchases") {
@@ -64,13 +58,11 @@ export default function ScreenerScreen({ navigation }: Props) {
       matchesType = typeLower === "sale";
     }
 
-    // 3. Insider Role Filter (Officer remains visible under "All roles", no Officer chip)
     let matchesRole = true;
     if (selectedRole !== "All roles") {
       matchesRole = trade.insiderRole === selectedRole;
     }
 
-    // 4. Value Threshold Filter
     let matchesThreshold = true;
     if (selectedThreshold === "$100K+") {
       matchesThreshold = trade.totalValue >= 100_000;
@@ -83,26 +75,21 @@ export default function ScreenerScreen({ navigation }: Props) {
     return matchesSearch && matchesType && matchesRole && matchesThreshold;
   });
 
-  const renderTradeItem = ({ item }: { item: InsiderTrade }) => (
-    <TradeCard
-      trade={item}
-      onPress={() => navigation.navigate("TradeDetails", { tradeId: item.id })}
-    />
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       {/* CUSTOM HEADER */}
       <View style={styles.headerRow}>
-        <View>
+        <View style={styles.headerTextContainer}>
           <Text style={styles.appName}>Stocks-N-Trades</Text>
-          <Text style={styles.screenTitle}>Trade Screener</Text>
+          <Text style={styles.screenTitle} numberOfLines={1}>
+            Trade Screener
+          </Text>
         </View>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           accessibilityRole="button"
-          accessibilityLabel="Go back"
+          accessibilityLabel="Go back to previous screen"
         >
           <Text style={styles.backButtonText}>← Back</Text>
         </TouchableOpacity>
@@ -121,14 +108,14 @@ export default function ScreenerScreen({ navigation }: Props) {
             value={searchQuery}
             onChangeText={setSearchQuery}
             accessibilityRole="search"
-            accessibilityLabel="Search ticker or company"
+            accessibilityLabel="Search ticker or company input field"
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity
               onPress={() => setSearchQuery("")}
               style={styles.clearSearchBtn}
               accessibilityRole="button"
-              accessibilityLabel="Clear search input"
+              accessibilityLabel="Clear search input text"
             >
               <Text style={styles.clearSearchText}>✕</Text>
             </TouchableOpacity>
@@ -193,7 +180,8 @@ export default function ScreenerScreen({ navigation }: Props) {
           <TouchableOpacity
             onPress={handleClearFilters}
             accessibilityRole="button"
-            accessibilityLabel="Clear all filters and search"
+            accessibilityLabel="Clear all active filters and search query"
+            style={styles.clearFiltersButton}
           >
             <Text style={styles.clearFiltersText}>Clear filters</Text>
           </TouchableOpacity>
@@ -246,6 +234,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
+    gap: 8,
+  },
+  headerTextContainer: {
+    flex: 1,
+    minWidth: 0,
   },
   appName: {
     fontSize: theme.typography.xs,
@@ -261,12 +254,13 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     backgroundColor: "#F3F4F6",
     borderRadius: 6,
     minHeight: 44,
     justifyContent: "center",
     alignItems: "center",
+    flexShrink: 0,
   },
   backButtonText: {
     fontSize: theme.typography.sm,
@@ -291,7 +285,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   clearSearchBtn: {
-    padding: 6,
+    padding: 8,
+    minHeight: 44,
+    minWidth: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   clearSearchText: {
     fontSize: theme.typography.sm,
@@ -323,6 +321,11 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sm,
     fontWeight: "700",
     color: theme.colors.textPrimary,
+  },
+  clearFiltersButton: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 4,
   },
   clearFiltersText: {
     fontSize: theme.typography.sm,

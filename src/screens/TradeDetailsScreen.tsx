@@ -44,7 +44,7 @@ export default function TradeDetailsScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* HEADER WITH BACK NAVIGATION & EXACT DEMO BADGE */}
+      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -75,7 +75,9 @@ export default function TradeDetailsScreen({ route, navigation }: Props) {
               <Text style={styles.sectorText}>{trade.sector}</Text>
             </View>
           </View>
-          <Text style={styles.companyName}>{trade.companyName}</Text>
+          <Text style={styles.companyName} numberOfLines={2}>
+            {trade.companyName}
+          </Text>
         </View>
 
         {/* NEUTRAL SIGNAL CARD */}
@@ -97,7 +99,9 @@ export default function TradeDetailsScreen({ route, navigation }: Props) {
           <View style={styles.detailsCard}>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Insider Name</Text>
-              <Text style={styles.detailValue}>{trade.insiderName}</Text>
+              <Text style={styles.detailValue} numberOfLines={1}>
+                {trade.insiderName}
+              </Text>
             </View>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Insider Role</Text>
@@ -195,7 +199,11 @@ export default function TradeDetailsScreen({ route, navigation }: Props) {
         </View>
 
         {/* EXACT REQUIRED DISCLAIMER */}
-        <View style={styles.disclaimerContainer}>
+        <View
+          style={styles.disclaimerContainer}
+          accessibilityRole="text"
+          accessibilityLabel="This prototype uses mock data for demonstration only. Insider-trading filings are public disclosures and do not constitute investment advice. Past activity does not guarantee future stock performance."
+        >
           <Text style={styles.disclaimerText}>
             This prototype uses mock data for demonstration only.
             Insider-trading filings are public disclosures and do not constitute
@@ -222,10 +230,11 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
+    gap: 8,
   },
   backButton: {
     paddingVertical: 6,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     backgroundColor: "#F3F4F6",
     borderRadius: 6,
     minHeight: 44,
@@ -347,15 +356,19 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#F3F4F6",
+    gap: 8,
   },
   detailLabel: {
     fontSize: theme.typography.sm,
     color: theme.colors.textSecondary,
+    flexShrink: 0,
   },
   detailValue: {
     fontSize: theme.typography.sm,
     fontWeight: "700",
     color: theme.colors.textPrimary,
+    flex: 1,
+    textAlign: "right",
   },
   chartCard: {
     backgroundColor: theme.colors.surface,

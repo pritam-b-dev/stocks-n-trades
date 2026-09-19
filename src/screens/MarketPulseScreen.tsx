@@ -11,9 +11,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/RootNavigator";
 import { mockTrades } from "../data/mockTrades";
 import { theme } from "../theme/theme";
-
-import { TradeCard } from "../components/TradeCard";
 import { SummaryCard } from "../components/SummaryCard";
+import { TradeCard } from "../components/TradeCard";
 
 type MarketPulseNavProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -35,7 +34,6 @@ const formatLargeCurrency = (val: number): string => {
 };
 
 export default function MarketPulseScreen({ navigation }: Props) {
-  // 1. Calculate Summary Metrics from mockTrades
   const totalTransactions = mockTrades.length;
 
   const totalPurchaseValue = mockTrades
@@ -46,13 +44,11 @@ export default function MarketPulseScreen({ navigation }: Props) {
     .filter((t) => t.transactionType.toLowerCase() === "sale")
     .reduce((sum, t) => sum + t.totalValue, 0);
 
-  // 2. Compute Top Signals (High strength trades sorted by highest totalValue)
   const topSignals = [...mockTrades]
     .filter((t) => t.signalStrength === "High")
     .sort((a, b) => b.totalValue - a.totalValue)
     .slice(0, 3);
 
-  // 3. Compute Latest Trades (Sorted by filedAt descending)
   const latestTrades = [...mockTrades]
     .sort(
       (a, b) => new Date(b.filedAt).getTime() - new Date(a.filedAt).getTime(),
@@ -61,12 +57,17 @@ export default function MarketPulseScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* SINGLE CUSTOM HEADER WITH DEMO BADGE */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* HEADER */}
         <View style={styles.headerRow}>
-          <View>
+          <View style={styles.headerTextContainer}>
             <Text style={styles.appName}>Stocks-N-Trades</Text>
-            <Text style={styles.screenTitle}>Market Pulse</Text>
+            <Text style={styles.screenTitle} numberOfLines={1}>
+              Market Pulse
+            </Text>
           </View>
           <View
             style={styles.demoBadge}
@@ -77,7 +78,7 @@ export default function MarketPulseScreen({ navigation }: Props) {
           </View>
         </View>
 
-        {/* SEARCH ENTRY (NAVIGATES TO SCREENER) */}
+        {/* SEARCH ENTRY */}
         <TouchableOpacity
           style={styles.searchBar}
           activeOpacity={0.7}
@@ -85,12 +86,12 @@ export default function MarketPulseScreen({ navigation }: Props) {
           accessibilityRole="search"
           accessibilityLabel="Search ticker or company. Navigates to Screener."
         >
-          <Text style={styles.searchBarPlaceholder}>
+          <Text style={styles.searchBarPlaceholder} numberOfLines={1}>
             🔍 Search ticker or company...
           </Text>
         </TouchableOpacity>
 
-        {/* EXACTLY 3 SUMMARY CARDS */}
+        {/* SUMMARY CARDS */}
         <View style={styles.summaryGrid}>
           <SummaryCard
             label="Transactions"
@@ -109,7 +110,7 @@ export default function MarketPulseScreen({ navigation }: Props) {
           />
         </View>
 
-        {/* TOP SIGNALS SECTION */}
+        {/* TOP SIGNALS */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Top Signals</Text>
         </View>
@@ -123,11 +124,13 @@ export default function MarketPulseScreen({ navigation }: Props) {
                 navigation.navigate("TradeDetails", { tradeId: trade.id })
               }
               accessibilityRole="button"
-              accessibilityLabel={`Top Signal: ${trade.ticker}, ${trade.signal}, Value: ${formatLargeCurrency(trade.totalValue)}`}
+              accessibilityLabel={`Top Signal for ${trade.ticker}, signal: ${trade.signal}, value: ${formatLargeCurrency(trade.totalValue)}`}
             >
               <View style={styles.topSignalMain}>
                 <Text style={styles.topSignalTicker}>{trade.ticker}</Text>
-                <Text style={styles.topSignalText}>{trade.signal}</Text>
+                <Text style={styles.topSignalText} numberOfLines={1}>
+                  {trade.signal}
+                </Text>
               </View>
               <Text style={styles.topSignalValue}>
                 {formatLargeCurrency(trade.totalValue)}
@@ -136,19 +139,19 @@ export default function MarketPulseScreen({ navigation }: Props) {
           ))}
         </View>
 
-        {/* LATEST TRADES SECTION WITH "VIEW ALL" CTA */}
+        {/* LATEST TRADES */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Latest Trades</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("Screener")}
             accessibilityRole="button"
-            accessibilityLabel="View all trades in Screener"
+            accessibilityLabel="View all trades in Screener screen"
+            style={styles.viewAllButton}
           >
             <Text style={styles.viewAllText}>View all ›</Text>
           </TouchableOpacity>
         </View>
 
-        {/* LATEST TRADES FEED USING TradeCard */}
         <View style={styles.tradesFeed}>
           {latestTrades.map((trade) => (
             <TradeCard
@@ -179,8 +182,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: theme.spacing.md,
-    flexWrap: "wrap",
     gap: 8,
+  },
+  headerTextContainer: {
+    flex: 1,
+    minWidth: 0,
   },
   appName: {
     fontSize: theme.typography.xs,
@@ -201,6 +207,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: "#F59E0B",
+    flexShrink: 0,
   },
   demoBadgeText: {
     fontSize: 10,
@@ -239,6 +246,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: theme.colors.textPrimary,
   },
+  viewAllButton: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
   viewAllText: {
     fontSize: theme.typography.sm,
     fontWeight: "600",
@@ -263,21 +275,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: theme.spacing.sm,
+    flex: 1,
+    minWidth: 0,
+    marginRight: 8,
   },
   topSignalTicker: {
     fontSize: theme.typography.sm,
     fontWeight: "800",
     color: theme.colors.textPrimary,
+    flexShrink: 0,
   },
   topSignalText: {
     fontSize: theme.typography.xs,
     color: theme.colors.textSecondary,
     fontWeight: "600",
+    flex: 1,
   },
   topSignalValue: {
     fontSize: theme.typography.sm,
     fontWeight: "700",
     color: theme.colors.textPrimary,
+    flexShrink: 0,
   },
   tradesFeed: {
     gap: theme.spacing.sm,
