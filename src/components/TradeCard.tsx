@@ -7,7 +7,6 @@ import { SignalBadge } from "./SignalBadge";
 interface TradeCardProps {
   trade: InsiderTrade;
   onPress: () => void;
-  variant?: "row" | "card";
 }
 
 const formatCurrency = (val: number): string => {
@@ -20,188 +19,151 @@ const formatCurrency = (val: number): string => {
   return `$${val.toLocaleString()}`;
 };
 
-const formatDate = (isoString: string): string => {
-  const date = new Date(isoString);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-};
+export function TradeCard({ trade, onPress }: TradeCardProps) {
+  const isPurchase = trade.transactionType.toLowerCase() === "purchase";
+  const arrowIcon = isPurchase ? "↑" : "↓";
+  const formattedDate = new Date(trade.filedAt).toLocaleString();
 
-export const TradeCard: React.FC<TradeCardProps> = ({
-  trade,
-  onPress,
-  variant = "row",
-}) => {
-  if (variant === "card") {
-    return (
-      <TouchableOpacity
-        style={styles.signalCard}
-        activeOpacity={0.7}
-        onPress={onPress}
-      >
-        <View style={styles.cardHeader}>
-          <Text style={styles.tickerText}>{trade.ticker}</Text>
-          <SignalBadge strength={trade.signalStrength} />
-        </View>
-
-        <Text style={styles.companyText} numberOfLines={1}>
-          {trade.companyName}
-        </Text>
-
-        <View style={styles.cardBody}>
-          <Text style={styles.insiderText}>
-            {trade.insiderName} ({trade.insiderRole})
-          </Text>
-          <Text
-            style={[
-              styles.tradeType,
-              trade.transactionType === "Purchase"
-                ? { color: theme.colors.purchase }
-                : { color: theme.colors.sale },
-            ]}
-          >
-            {trade.transactionType} • {formatCurrency(trade.totalValue)}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  }
+  const accessibilityLabel = `Trade card for ${trade.ticker}, ${trade.companyName}. ${trade.transactionType} of ${trade.shares.toLocaleString()} shares worth ${formatCurrency(trade.totalValue)} by ${trade.insiderName}, ${trade.insiderRole}. Filed at ${formattedDate}. Signal strength: ${trade.signalStrength}.`;
 
   return (
     <TouchableOpacity
-      style={styles.tradeRow}
+      style={styles.card}
       activeOpacity={0.7}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
     >
-      <View style={styles.tradeRowLeft}>
-        <View
-          style={[
-            styles.typeIndicator,
-            trade.transactionType === "Purchase"
-              ? { backgroundColor: theme.colors.purchase }
-              : { backgroundColor: theme.colors.sale },
-          ]}
-        >
-          <Text style={styles.typeIndicatorText}>
-            {trade.transactionType === "Purchase" ? "BUY" : "SELL"}
+      <View style={styles.cardHeader}>
+        <View style={styles.tickerGroup}>
+          <Text style={styles.ticker}>{trade.ticker}</Text>
+          <Text style={styles.companyName} numberOfLines={1}>
+            {trade.companyName}
           </Text>
         </View>
-        <View style={styles.tradeInfo}>
-          <Text style={styles.rowTicker}>
-            {trade.ticker}{" "}
-            <Text style={styles.rowCompany}>• {trade.companyName}</Text>
-          </Text>
-          <Text style={styles.rowInsider}>
-            {trade.insiderName} ({trade.insiderRole})
-          </Text>
-        </View>
+        <SignalBadge strength={trade.signalStrength} />
       </View>
 
-      <View style={styles.tradeRowRight}>
-        <Text style={styles.rowValue}>{formatCurrency(trade.totalValue)}</Text>
-        <Text style={styles.rowDate}>{formatDate(trade.filedAt)}</Text>
+      <View style={styles.divider} />
+
+      <View style={styles.detailsRow}>
+        <View style={styles.detailCol}>
+          <Text style={styles.label}>Insider</Text>
+          <Text style={styles.valueBold} numberOfLines={1}>
+            {trade.insiderName}
+          </Text>
+          <Text style={styles.subValue}>{trade.insiderRole}</Text>
+        </View>
+
+        <View style={styles.detailColRight}>
+          <Text style={styles.label}>Transaction</Text>
+          <View style={styles.typeRow}>
+            <Text
+              style={[
+                styles.arrowText,
+                isPurchase
+                  ? { color: theme.colors.purchase }
+                  : { color: theme.colors.sale },
+              ]}
+            >
+              {arrowIcon}
+            </Text>
+            <Text
+              style={[
+                styles.valueBold,
+                isPurchase
+                  ? { color: theme.colors.purchase }
+                  : { color: theme.colors.sale },
+              ]}
+            >
+              {trade.transactionType} ({trade.transactionCode})
+            </Text>
+          </View>
+          <Text style={styles.subValue}>
+            {formatCurrency(trade.totalValue)}
+          </Text>
+          <Text style={styles.filingTimeText}>{formattedDate}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  signalCard: {
-    width: 210,
+  card: {
     backgroundColor: theme.colors.surface,
-    padding: theme.spacing.md,
     borderRadius: 12,
+    padding: theme.spacing.md,
     borderWidth: 1,
     borderColor: "#E5E7EB",
+    minHeight: 44,
   },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 4,
+    flexWrap: "wrap",
+    gap: 8,
   },
-  tickerText: {
+  tickerGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexShrink: 1,
+  },
+  ticker: {
     fontSize: theme.typography.md,
-    fontWeight: "bold",
+    fontWeight: "800",
     color: theme.colors.textPrimary,
   },
-  companyText: {
+  companyName: {
     fontSize: theme.typography.sm,
     color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.sm,
+    flexShrink: 1,
   },
-  cardBody: {
-    borderTopWidth: 1,
-    borderTopColor: "#F3F4F6",
-    paddingTop: theme.spacing.xs,
+  divider: {
+    height: 1,
+    backgroundColor: "#F3F4F6",
+    marginVertical: theme.spacing.sm,
   },
-  insiderText: {
-    fontSize: 12,
-    color: theme.colors.textPrimary,
-    fontWeight: "500",
-  },
-  tradeType: {
-    fontSize: 12,
-    fontWeight: "700",
-    marginTop: 2,
-  },
-  tradeRow: {
-    backgroundColor: theme.colors.surface,
+  detailsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    padding: theme.spacing.md,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    marginBottom: theme.spacing.sm,
   },
-  tradeRowLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    paddingRight: theme.spacing.sm,
-  },
-  typeIndicator: {
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginRight: theme.spacing.sm,
-  },
-  typeIndicatorText: {
-    color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "800",
-  },
-  tradeInfo: {
+  detailCol: {
     flex: 1,
   },
-  rowTicker: {
-    fontSize: theme.typography.md,
-    fontWeight: "bold",
-    color: theme.colors.textPrimary,
+  detailColRight: {
+    alignItems: "flex-end",
   },
-  rowCompany: {
-    fontSize: theme.typography.sm,
-    fontWeight: "normal",
+  label: {
+    fontSize: 11,
     color: theme.colors.textSecondary,
+    textTransform: "uppercase",
   },
-  rowInsider: {
+  valueBold: {
+    fontSize: theme.typography.sm,
+    fontWeight: "700",
+    color: theme.colors.textPrimary,
+    marginTop: 2,
+  },
+  subValue: {
     fontSize: 12,
     color: theme.colors.textSecondary,
     marginTop: 2,
   },
-  tradeRowRight: {
-    alignItems: "flex-end",
+  typeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
   },
-  rowValue: {
-    fontSize: theme.typography.md,
-    fontWeight: "700",
-    color: theme.colors.textPrimary,
+  arrowText: {
+    fontSize: 14,
+    fontWeight: "800",
   },
-  rowDate: {
-    fontSize: 11,
+  filingTimeText: {
+    fontSize: 10,
     color: theme.colors.textSecondary,
     marginTop: 2,
   },
