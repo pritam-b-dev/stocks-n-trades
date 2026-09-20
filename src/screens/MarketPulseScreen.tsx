@@ -53,7 +53,7 @@ export default function MarketPulseScreen({ navigation }: Props) {
     .sort(
       (a, b) => new Date(b.filedAt).getTime() - new Date(a.filedAt).getTime(),
     )
-    .slice(0, 4);
+    .slice(0, 6);
 
   return (
     <SafeAreaView style={styles.container}>
